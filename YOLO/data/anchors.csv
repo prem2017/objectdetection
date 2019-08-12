@@ -1,0 +1,16 @@
+# https://github.com/pjreddie/darknet/issues/568
+# https://github.com/AlexeyAB/darknet#how-to-train-to-detect-your-custom-objects
+# Width and height
+# box_w[i, j, b] = anchor_w[b] * exp(delta_w[i, j, b]) * 32
+# box_h[i, j, b] = anchor_h[b] * exp(delta_h[i, j, b]) * 32
+# X and Y
+# box_x[i, j, b] = (i + sigmoid(delta_x[i, j, b])) * 32
+# box_y[i, j, b] = (j + sigmoid(delta_y[i, j, b])) * 32
+# Read the github link to know more
+# Here five anchors are given when the size of grid is 19x19 but generally should be computed with K-means algorithms.
+width,height
+1.08,1.19, 
+3.42,4.41, 
+6.63,11.38, 
+9.42,5.11, 
+16.62,10.52.

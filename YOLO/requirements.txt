@@ -1,0 +1,12 @@
+# pip install -r requirements.txt
+torch==1.2.0
+torchvision==0.4.0a0+6b959ee
+scipy==1.1.0
+numpy==1.16.4
+matplotlib==2.2.3
+pandas==0.23.0
+scikit_image==0.14.2
+torchcontrib==0.0.2
+Pillow==6.1.0
+skimage==0.0
+scikit_learn==0.21.3
