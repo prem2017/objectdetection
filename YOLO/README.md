@@ -31,7 +31,7 @@ Execute $ `pip install -r requirements.txt` to install all the dependency.
 
  * For any machine learning algorithm the prerequisite is data. It is the data from which algorithms learn and in supervised learning, we need target data as well. In this problem, we only have images thus need to generate the bounding boxes for these two class of objects here.  
 
- * We use a third party ([source](./detect_object/README.md)) module and make changes to adapt for our need. 
+ * We use a third party ([source](./draw_box/README.md)) module and make changes to adapt for our need. 
 
 
 

@@ -1,14 +1,19 @@
 ce_object-detection/*
 YOLO/src/__pycache__/*
-YOLO/detect_object/__pycache__/*
-YOLO/detect_object/data/*.jpg
 YOLO/data/test/*.jpg
 YOLO/data/train/*.jpg
 YOLO/data/val/*.jpg
 Jupyter-suggestions.txt
 
-*.DS_Store 
 
+YOLO/draw_box/__pycache__/*
+YOLO/draw_box/data/*.jpg
+
+
+
+
+YOLO/Bilberry/*
 # Local files
+*.DS_Store 
 *.pyc
 *.ipynb
