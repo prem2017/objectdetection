@@ -346,7 +346,7 @@ def yolo_non_max_suppression(scores, boxes, classes, max_boxes = 9, iou_threshol
 		i = 0
 		remaining_indices = deepcopy(indices)
 		while i < len(indices):
-			print('\n[First-While] i = {}, indices = {}, remaining_indices = {}'.format(i, indices, remaining_indices))
+			# print('\n[First-While] i = {}, indices = {}, remaining_indices = {}'.format(i, indices, remaining_indices))
 			j = i + 1
 			if indices[i] not in remaining_indices:
 				i += 1
@@ -358,7 +358,7 @@ def yolo_non_max_suppression(scores, boxes, classes, max_boxes = 9, iou_threshol
 					continue
 
 				iou_val = iou(boxes[indices[i]], boxes[indices[j]])
-				print('indices = {}, remaining_indices = {}, indices[i] = {}, indices[j] = {}, iou_val = {}'.format(indices, remaining_indices, (i, indices[i]), (j, indices[j]), iou_val))
+				# print('indices = {}, remaining_indices = {}, indices[i] = {}, indices[j] = {}, iou_val = {}'.format(indices, remaining_indices, (i, indices[i]), (j, indices[j]), iou_val))
 				# print(f'i = {i}, boxes[indices[i]] = {boxes[indices[i]]}, \n j = {j}, boxes[indices[j]], {boxes[indices[j]]}')
 				# print(f'scores[indices[i]] = {scores[indices[i]]}  scores[indices[j]] = {scores[indices[j]]}')
 				if iou_val >= iou_threshold:
