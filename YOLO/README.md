@@ -1,4 +1,4 @@
-# Object Detection using you only look once (YOLO) algorithm
+# Object Detection using You Only Look Once (YOLO) algorithm
 
 ![Language](https://img.shields.io/badge/language-Python-blue.svg)
 

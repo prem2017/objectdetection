@@ -61,13 +61,16 @@ get_test_batch_size = lambda: K_TEST_BATCH_SIZE
 
 
 #******************** Data
-K_PROJECT_DIR = os.path.dirname(os.getcwd())
+K_PROJECT_DIR =  os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # os.path.dirname(os.getcwd())
+print('\n\n ****** K_PROJECT_DIR = {} ******'.format(K_PROJECT_DIR))
 get_project_dir = lambda: K_PROJECT_DIR
 msg = '[Project] dir = {}'.format(K_PROJECT_DIR)
 print(msg)
 
 K_DATA_DIR = os.path.join(K_PROJECT_DIR, 'data')
 get_root_data_dir = lambda: K_DATA_DIR
+
+get_font_path = lambda: os.path.join(get_project_dir(), 'src', 'font/FiraMono-Medium.otf')
 
 get_train_datapath = lambda: os.path.join(K_DATA_DIR, 'train')
 get_train_fnames = lambda: [fname for fname in os.listdir(get_train_datapath()) if '.jpg' in fname.lower()]

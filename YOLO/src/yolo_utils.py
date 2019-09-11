@@ -4,7 +4,7 @@
 	General YOLO utility module 
 
 	Credits: one section of code is taken/adapted from 
-				Source: [Taken From Github] (https://github.com/HeroKillerEver/coursera-deep-learning)
+			 Source: [Taken From Github] (https://github.com/HeroKillerEver/coursera-deep-learning)
 """
 
 import pdb
@@ -21,8 +21,8 @@ from PIL import Image, ImageDraw, ImageFont
 
 import torch
 
-import util 
-from util import logger
+from . import util 
+from .util import logger
 
 
 
@@ -36,7 +36,7 @@ get_class_names = lambda: ('Beet', 'Thistle')
 get_class_colors = lambda: ('Yellow', 'Red')
 
 # Grid and anchors information
-K_GRID_SHAPE = (4, 4)
+K_GRID_SHAPE = (4, 4) # (rows, cols) i.e along height, width
 get_grid_shape = lambda: K_GRID_SHAPE 
 K_ANCHORS = 1
 get_num_anchors = lambda: K_ANCHORS
@@ -76,7 +76,7 @@ def scale_boxes(boxes, image_shape):
 	return boxes
 
 
-def load_and_resize_image(img_path, model_image_size):
+def load_and_resize_image_ndarray(img_path, model_image_size):
 	"""Reads the image and resizes it.
 		
 		Parameters:
@@ -100,6 +100,30 @@ def load_and_resize_image(img_path, model_image_size):
 	return true_img_size, image_data
 
 
+def load_and_resize_image(img_path, model_image_size):
+	"""Reads the image and resizes it.
+		
+		Parameters:
+		-----------
+			img_path (str): fullpath to the image where it is located.
+			model_image_size (tuple): the dimension (width, height) of image which goes to model. 
+									  Note: here that pil-images have first dimension width and second height 
+
+		Returns:
+		--------
+			true_img_size (tuple): the true (width, height) of original image.
+			image_data (numpy.ndarray): the resized image in shape (H x W x C)
+	"""
+	image_type = imghdr.what(img_path)
+	image = Image.open(img_path)
+	resized_image = image.resize(model_image_size, Image.BICUBIC) # NOTE:  (width, height).
+	image_data = np.array(resized_image, dtype='float32') #  this converts to (height x width x channel)
+	image_data /= 255.
+	
+	# pdb.set_trace()
+	
+	true_img_size = image.size
+	return true_img_size, image_data
 
 
 
@@ -116,10 +140,11 @@ def draw_boxes(image, out_scores, out_boxes, out_classes, class_names, colors):
 			colors (list): list of colors corresponsing to each unique class. 
 
 		Returns:
+		--------
 			None: 
 	"""
-	
-	font = ImageFont.truetype(font='font/FiraMono-Medium.otf',size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
+	font_path = util.get_font_path()
+	font = ImageFont.truetype(font=font_path,size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
 	thickness = (image.size[0] + image.size[1]) // 300
 
 	for i, c in reversed(list(enumerate(out_classes))):
@@ -141,10 +166,11 @@ def draw_boxes(image, out_scores, out_boxes, out_classes, class_names, colors):
 		if abs(area) < 1e-2:
 			continue
 
+		# Left topmost corner
 		left = max(0, np.floor(left + 0.5).astype('int32'))
 		top = max(0, np.floor(top + 0.5).astype('int32'))
 
-		# 
+		# right bottommost corner
 		right = min(image.size[0], np.floor(right + 0.5).astype('int32'))
 		bottom = min(image.size[1], np.floor(bottom + 0.5).astype('int32'))
 
@@ -164,7 +190,7 @@ def draw_boxes(image, out_scores, out_boxes, out_classes, class_names, colors):
 
 
 def draw_boxes_raw(image, boxes, class_names = ['Beet', 'Thistle'], colors=['Yellow', 'Red']):
-	""" Temporary for checking that the created dataset works to draw boxes around the objects.
+	"""Temporary for checking that the created dataset works to draw boxes around the objects.
 		
 		Parameters:
 		-----------
@@ -248,6 +274,7 @@ def yolo_filter_boxes(box_confidence, boxes, box_class_probs, threshold = .6):
 	
 	# TOOD: may be perform only on class probability rahter than (box_confidence * box_class_probs)
 	# Element-wise multiplication to compute the confidence i.e. obj/non-obj * class_probs
+	# pdb.set_trace()
 	box_scores = np.multiply(box_confidence, box_class_probs)
 	
 	# Find the box_classes thanks to the max box_scores, keep track of the corresponding score
@@ -259,7 +286,7 @@ def yolo_filter_boxes(box_confidence, boxes, box_class_probs, threshold = .6):
 	filtering_mask = np.greater_equal(box_class_scores, threshold)
 	
 	# Apply the mask to scores, boxes and classes
-	scores = box_class_scores[filtering_mask] # shape = (?,) i.e. is list of length = filtering_mask.sum() meaning for all element for which mast is positive 
+	scores = box_class_scores[filtering_mask] # shape = (?,) i.e. is list of length = filtering_mask.sum() meaning for all element for which mask is positive 
 	boxes = boxes[filtering_mask] # shape = (?, 4) ? is represent boxes whose mask value is positive that are the filtered ones
 	classes = box_classes[filtering_mask] # shape = (?,) 
 	
@@ -269,10 +296,13 @@ def yolo_filter_boxes(box_confidence, boxes, box_class_probs, threshold = .6):
 def iou(box1, box2):
 	"""Implement the intersection over union (IoU) between box1 and box2
 	
-		Arguments:
+		Parameters:
+		-----------
 			box1 -- first box, list object with coordinates (x1, y1, x2, y2)
 			box2 -- second box, list object with coordinates (x1, y1, x2, y2)
+
 		Returns:
+		--------
 			Jaccard's distance/IOU value
 	"""
 
@@ -505,9 +535,9 @@ def box_coordinates(object_center, object_size, model_image_size):
 	return x1, y1, x2, y2
 
 
-def construct_target(coord_labels, true_image_size, model_image_size, num_cls, grid_shape, anchors=1):
+def construct_target(coord_labels, true_image_size, model_image_size, num_cls, grid_shape, anchors=1, y_tfr_func=None):
 	"""Construct the target of shape: grid_shape (GR, GC) x (anchors (K) * (1 + Coordinate (x, y, w, h): 4 + #Classes (C)))
-	   Shape: GR x GC x (A*5+C) i.e for G =4, A = 1, C = 2 the shape is 4x4x7.  
+	   Shape: GR x GC x (A*5+C) i.e for G = 4, A = 1, C = 2 the shape is 4x4x7.  
 		
 
 		Parameters:
@@ -524,7 +554,7 @@ def construct_target(coord_labels, true_image_size, model_image_size, num_cls, g
 		--------
 			target (dict[str]: numpy.ndarray): 
 					conf (int): GR x GC x A x 1, 
-					box (float): GR x GCx A x 1, 
+					box (float): GR x GCx A x 4, 
 					class (int): GR x GCx A x num_cls } 
 					Note: that this method only support for one anchor
 
@@ -555,19 +585,30 @@ def construct_target(coord_labels, true_image_size, model_image_size, num_cls, g
 	for obj in coord_labels:
 
 		obj_coord = np.array(obj[:4]).reshape(2, 2) * [width / true_image_size[0], height / true_image_size[1]]
+		if y_tfr_func is not None:
+			obj_coord = y_tfr_func(obj_coord, model_image_size)
+
+
 		label = obj[4]
 		# print('New coordinate = ', obj_coord, 'label = ', label)
 
 
 		# Object center co-ordinates
-		obj_cx, obj_cy = (obj_coord[0, 0] + obj_coord[1, 0]) / 2, (obj_coord[0, 1] + obj_coord[1,1]) / 2
+		obj_cx, obj_cy = (obj_coord[0, 0] + obj_coord[1, 0]) / 2, (obj_coord[0, 1] + obj_coord[1,    1]) / 2
 		# Object width and height
 		obj_w, obj_h = abs(obj_coord[1, 0] - obj_coord[0, 0]), abs(obj_coord[1, 1] - obj_coord[0, 1])
-		# Object index in the 2D cell
-		obj_i, obj_j = int(obj_cx // cell_width), int(obj_cy // cell_height)
+		
+		# Object index in the 2D cell # Since the first dimension to network is height and second width
+		# obj_i, obj_j = int(obj_cx // cell_width), int(obj_cy // cell_height) 
+		# [Change] # Since the first dimension to network is height and second width
+		obj_i, obj_j = int(obj_cy // cell_height), int(obj_cx // cell_width) 
+
 
 		# Object-center's cell-center coordinates
-		cell_cx, cell_cy = ((cell_width * obj_i) + cell_width / 2), ((cell_height * obj_j) + cell_height / 2) 
+		# cell_cx, cell_cy = ((cell_width * obj_i) + cell_width / 2), ((cell_height * obj_j) + cell_height / 2) 
+		# [Change] Since the first dimension to network is height and second width
+		cell_cx, cell_cy = ((cell_width * obj_j) + cell_width / 2), ((cell_height * obj_i) + cell_height / 2) 
+
 
 		# TODO: In case more than one anchors then use IOU to decide which anchor to select
 		anchor = 0
@@ -629,7 +670,9 @@ def yolo_boxes_to_corners(delta_box_xy, delta_box_wh,  model_image_size, true_im
 	boxes = np.zeros((rows, cols, anchors, 4))
 	for i in range(rows):
 		for j in range(cols):
-			cell_cx, cell_cy = float((cell_width * i) + cell_width / 2), float((cell_height * j) + cell_height / 2) 
+			# cell_cx, cell_cy = float((cell_width * i) + cell_width / 2), float((cell_height * j) + cell_height / 2) 
+			# [Change] # Since the first dimension to network is height and second width
+			cell_cx, cell_cy = float((cell_width * j) + cell_width / 2), float((cell_height * i) + cell_height / 2) 
 
 			anchor = 0
 			delta_cx, delta_cy = delta_box_xy[i, j, anchor, :]
@@ -656,7 +699,8 @@ def yolo_boxes_to_corners(delta_box_xy, delta_box_wh,  model_image_size, true_im
 def yolo_eval(yolo_outputs, model_image_size, true_image_size=None, max_boxes=9, score_threshold=.6, iou_threshold=.5, on_true=False):
 	"""Converts the output of YOLO encoding (a lot of boxes) to your predicted boxes along with their scores, box coordinates and classes.
 	
-		Arguments:
+		Parameters:
+		-----------
 			yolo_outputs -- output of the encoding model (for image_shape of (model_width, model_height, 3)), contains 4 tensors:
 							box_confidence: tensor of shape (GR x GC x A x 1) => (4, 4, 1, 1)
 							box_xy: tensor of shape (GR x GC x A x 2) = > (4, 4, 1, 2)

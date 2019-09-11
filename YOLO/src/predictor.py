@@ -6,7 +6,6 @@
 """
 
 import pdb
-
 import os
 import sys
 from copy import deepcopy
@@ -25,13 +24,13 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
-from loss_functions import YoloLoss
-from models import AgriNet
-from image_dataset import ImageDataset
+from .loss_functions import YoloLoss
+from .models import AgriNet
+from .image_dataset import ImageDataset
 
-import yolo_utils as yutil
-import util
-from util import logger
+from . import yolo_utils as yutil
+from . import util
+from .util import logger
 
 def load_trained_model(model_fname):
 	"""Loads the pretrained model for the given model name.
@@ -272,7 +271,7 @@ def predict_on_test(models, data_info, weights=None, has_target=False, results_p
 						print('k = {}, y_true_all[k].sum() = {} '.format(k, y_true_all[k].sum()))
 
 			true_image_size_all = true_image_size if true_image_size_all is None else torch.cat((true_image_size_all, true_image_size), dim=0)
-	
+	# End of inference
 	
 	if has_target:
 		test_report, f1_checker, aps = gen_conf_and_cls_report(y_true_all, y_pred_all)

@@ -5,6 +5,12 @@
 	OtherCNN architecture tried are here and is for reference oly  
 """
 
+import pdb
+import os
+
+import torch
+import torch.nn as nn
+
 """ # TODO: backup simpler network
 
 				nn.Conv2d(in_channels=in_channels, out_channels=32, kernel_size=3, stride=1, padding=1),

@@ -21,15 +21,15 @@ from torch.optim.lr_scheduler import MultiStepLR
 from torchcontrib.optim import SWA
 
 
-from loss_functions import YoloLoss
-from models import AgriNet
-from image_dataset import ImageDataset
+from .loss_functions import YoloLoss
+from .models import AgriNet
+from .image_dataset import ImageDataset
 
-from predictor import gen_conf_and_cls_report
+from .predictor import gen_conf_and_cls_report
 
-import util
-from util import logger
-import yolo_utils as yutil
+from . import util
+from .util import logger
+from . import yolo_utils as yutil
 
 
 class Optimizer(object):
@@ -180,6 +180,8 @@ def train_network(dataloader, model, loss_function, optimizer, start_lr, end_lr,
 				opt.zero_grad()
 			
 			output = model['yolo'](x) # initial_states[-1, :, :] i.e shape => [-1 (#layers) x batch-size x hidden-size]
+
+
 			loss = loss_function(output, y)
 
 			loss.backward()
