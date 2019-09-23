@@ -18,6 +18,7 @@ from copy import deepcopy
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
+from skimage import color
 
 import torch
 
@@ -94,7 +95,7 @@ def load_and_resize_image_ndarray(img_path, model_image_size):
 	image = Image.open(img_path)
 	resized_image = image.resize(model_image_size, Image.BICUBIC) # NOTE:  (width, height).
 	image_data = np.array(resized_image, dtype='float32') #  this converts to (height x width x channel)
-	image_data /= 255.
+	# image_data /= 255.
 	# image_data = np.expand_dims(image_data, 0)  # Add batch dimension.
 	true_img_size = image.size
 	return true_img_size, image_data
@@ -118,13 +119,32 @@ def load_and_resize_image(img_path, model_image_size):
 	image = Image.open(img_path)
 	resized_image = image.resize(model_image_size, Image.BICUBIC) # NOTE:  (width, height).
 	image_data = np.array(resized_image, dtype='float32') #  this converts to (height x width x channel)
-	image_data /= 255.
+	# image_data /= 255.
 	
 	# pdb.set_trace()
 	
 	true_img_size = image.size
 	return true_img_size, image_data
 
+
+def change_hue(image, hue):
+    """Return image tinted by the given hue based on a image.
+       Source: https://stackoverflow.com/questions/22503938/color-rotation-in-hsv-using-scikit-image
+	   Parameters:
+	   -----------
+	   		image (numpy.ndarray): image in ndarray of shape H X W X C
+	   		hue (float): A value between 0 and 1 to set the hue of image
+
+	   	Returns:
+	   	--------
+			image (numpy.ndarray): 
+
+
+    """
+    hsv = color.rgb2hsv(color.gray2rgb(image))
+    hsv[:, :, 0] = hue
+    # hsv[:, :, 1] = 1  # Turn up the saturation; we want the color to pop!
+    return color.hsv2rgb(hsv)
 
 
 def draw_boxes(image, out_scores, out_boxes, out_classes, class_names, colors):
@@ -435,8 +455,21 @@ def delta_obj_center(obj_center, cell_center, cell_size):
 	cell_cx, cell_cy = cell_center
 	cell_width, cell_height = cell_size 
 
-	delta_cx = np.arctanh((obj_cx - cell_cx) * (2 / cell_width) + 1e-6) # 1e-6 to avoid nan 
-	delta_cy = np.arctanh((obj_cy - cell_cy) * (2 / cell_height) + 1e-6)
+	temp_delta_cx = (obj_cx - cell_cx) * (2 / cell_width) + 1e-6
+	temp_delta_cy = (obj_cy - cell_cy) * (2 / cell_height) + 1e-6
+	
+	if temp_delta_cx > 0.0:
+		temp_delta_cx -= 1e-6
+	else:
+		temp_delta_cx += 1e-6
+
+	if temp_delta_cy > 0.0:
+		temp_delta_cy -= 1e-6
+	else:
+		temp_delta_cy += 1e-6
+
+	delta_cx = np.arctanh(temp_delta_cx) # 1e-6 to avoid nan 
+	delta_cy = np.arctanh(temp_delta_cy)
 	return delta_cx, delta_cy
 
 	
@@ -726,7 +759,7 @@ def yolo_eval(yolo_outputs, model_image_size, true_image_size=None, max_boxes=9,
 	### START CODE HERE ### 
 	
 	# Retrieve outputs of the YOLO model (≈1 line)
-	print('*********************** [In] yolo_eval ***********************')
+	# print('*********************** [In] yolo_eval ***********************')
 	if type(yolo_outputs) == np.ndarray:
 		box_confidence = yolo_outputs[..., 0:1]
 		delta_box_xy, delta_box_wh = yolo_outputs[..., 1:3], yolo_outputs[..., 3:5]

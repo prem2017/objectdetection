@@ -116,5 +116,6 @@ class YoloLoss(nn.Module):
 			print('loss = ', loss.item())
 			print('output = ', output)
 			print('y_target = ', y_target)
+			exit()
 		
 		return loss

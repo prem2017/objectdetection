@@ -12,6 +12,7 @@ from skimage.color import rgba2rgb
 import torch
 from torch.utils.data import Dataset
 
+from .transformers import NormalizeImageData, MirrorImage, InvertVerticallyImage, MirrorAndInvertVerticallyImage, Rotate90Image, Rotate270Image, RandomColorShifter 
 from . import yolo_utils as yutil
 
 
@@ -27,11 +28,10 @@ class ImageDataset(Dataset):
 			boxes_info_dict (dict): {key (img_name: value (numpy.ndarray))} the object information of the objects.
 									Available only for those which has at least object in the image.
 			transformers (list[transformer]): List of transformer from which randomly one is picked for data augmentation  
-
-			#TODO: Implement data augmentation such as flip, and manipulating hue, saturation, luminescence
+			test_transformer_flag (int): A checker to control data-augmentation which should be set to (1) for unittest to test the transformers.  
 	"""
 	
-	def __init__(self, datatype_dir, get_fnames_method, model_img_size, boxes_info_dict=None, transformers=None):
+	def __init__(self, datatype_dir, get_fnames_method, model_img_size, boxes_info_dict=None, transformers=None, test_transformer_flag=0):
 		self.datatype_dir = datatype_dir
 		
 		self.fnames = get_fnames_method()
@@ -40,8 +40,14 @@ class ImageDataset(Dataset):
 
 		self.transformers = transformers
 		self.transformer_len = 0
+
+		self.test_transformer_flag = test_transformer_flag # If this class is instantiated to perform unittest else the behaviour is normal
 		if self.transformers is not None:
 			self.transformer_len = len(self.transformers)
+
+		self.normalizer = NormalizeImageData()
+
+		
 
 
 	
@@ -59,7 +65,7 @@ class ImageDataset(Dataset):
 
 		img_name_path = os.path.join(self.datatype_dir, img_name)
 		
-		# img_ndarray: np.ndarray of shape (H x W x C)
+		# img_ndarray: np.ndarray of shape (H x W x C) without normalization meaning values in [0, 255]
 		true_image_size, img_ndarray = yutil.load_and_resize_image(img_name_path, self.model_image_size) 
 
 		if len(img_ndarray.shape) == 3:
@@ -83,19 +89,26 @@ class ImageDataset(Dataset):
 			# pdb.set_trace()
 			
 
-			
+			if self.test_transformer_flag: 
+				use_transformer_flag = 1 # while testing make sure to use transformer since we are testing it.
+			else:
+				use_transformer_flag = np.random.randint(2) # This will allow only half the times images to be transformed at others it is passed as normal
+
+
 			# pdb.set_trace()
-			if self.transformer_len > 0:
+			if self.transformer_len > 0 and use_transformer_flag:
 				tfr_rand_key = np.random.randint(self.transformer_len)
+				# print('#tfr_rand_key = ', tfr_rand_key)
 				y_tfr_func = self.transformers[tfr_rand_key]['y_tfr_func']
 
 				target = yutil.construct_target(boxes_info, true_image_size, self.model_image_size, yutil.get_num_classes(), yutil.get_grid_shape(), yutil.get_num_anchors(), y_tfr_func=y_tfr_func)
-				img_ndarray, target = self.transformers[tfr_key]['x_tfr'](img_ndarray, target)
+				img_ndarray, target = self.transformers[tfr_rand_key]['x_tfr'](img_ndarray, target)
 			else:
 				target = yutil.construct_target(boxes_info, true_image_size, self.model_image_size, yutil.get_num_classes(), yutil.get_grid_shape(), yutil.get_num_anchors())
 
-
 			# pdb.set_trace()
+			img_ndarray = self.normalizer(img_ndarray)
+			
 			img_ndarray = img_ndarray.transpose(2, 0, 1) # (H x W x C) => (C x H x W)
 
 			return img_ndarray, target, np.array(true_image_size)

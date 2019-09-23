@@ -124,7 +124,7 @@ def gen_conf_and_cls_report(ytrue, ypred):
 	report = {'conf': {}, 'class': {}}
 	pred_conf_label, pred_conf_prob = compute_label_and_prob(pred_conf_val)
 
-	print('\n\ntype(y_true) = {} type(pred_conf_label) = {}'.format(true_conf_lable.type(), pred_conf_label.type()))
+	# print('\n\ntype(y_true) = {} type(pred_conf_label) = {}'.format(true_conf_lable.type(), pred_conf_label.type()))
 	report['conf']['f1'] = f1_score(y_true=true_conf_lable.cpu().numpy(), y_pred=pred_conf_label.cpu().numpy())
 	f1_checker.append(report['conf']['f1'] )
 
@@ -303,6 +303,7 @@ def predict_on_test(models, data_info, weights=None, has_target=False, results_p
 		# print(msg)
 
 		img_fname = img_fname_all[i]
+		print('\n\n *************************** Image Name = {} *************************** \n\n'.format(img_fname))
 		# pdb.set_trace()
 		pred_scores, pred_boxes, pred_classes = yutil.yolo_eval(yolo_outputs=yolo_outputs, model_image_size=model_image_size, true_image_size=true_image_size, max_boxes=9, score_threshold=.45, iou_threshold=.6)
 		
@@ -368,7 +369,7 @@ if __name__ == '__main__':
 	# extra = 'epochs_swa_ensemble'
 	# extensions = ['', '_mintrain', '_minval', '_maxconf_f1', '_maxaps']
 	# for ex in extensions:
-	ex = '_mintrain'
+	ex =  '_maxaps' # '_maxconf_f1'# '_mintrain' '_minval' _maxaps
 	model_fnames = [model_fname + ex] # _maxconf_f1,   _minval model_fname + '_mintrain', model_fname + '_minval', model_fname + '_min_mae_val']
 	msg = '###################################################################'
 	msg += '## {} ##'.format(model_fnames)

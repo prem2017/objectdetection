@@ -24,6 +24,8 @@ from torchcontrib.optim import SWA
 from .loss_functions import YoloLoss
 from .models import AgriNet
 from .image_dataset import ImageDataset
+from .transformers import MirrorImage, InvertVerticallyImage, MirrorAndInvertVerticallyImage, Rotate90Image, Rotate270Image, RandomColorShifter, ChangeHueImage, ChangeSaturation, ChangeLuminescenceImage, ChangeHSLImage 
+
 
 from .predictor import gen_conf_and_cls_report
 
@@ -472,24 +474,37 @@ def train_model(train_data_info, val_data_info, sanity_check=False):
 		weight_decay = 0
 		dropout = 0
 	else:
-		weight_decay = 1e-3 # 1e-6
+		weight_decay = 1e-2 # 1e-6
 		# dropout = 0.3 # 0.5 # might not be needed
-	class_weight = [1.1, 1.4] #  [1.1, 1.5] # [1, 5] TODO: check for other values also 
-	conf_weight = 1.1
+	class_weight = [1.2, 1.8] #  [1.1, 1.5] # [1, 5] TODO: check for other values also 
+	conf_weight = 1.5
 
-	#####################
+
 	## TODO: For data augmentation such as flip, hue, saturation, brighness
-	#####################
 	# transformer = torch_transformer.Compose([RescaleImage((int(1.2 * util.HEIGHT_DEFAULT_VAL), int(1.2 * util.WIDTH_DEFAULT_VAL))),
 	# 										 RandomCropImage((util.HEIGHT_DEFAULT_VAL, util.WIDTH_DEFAULT_VAL)),
 
-	# ])
-	# transformer = []
+	def get_transformers_dict():
+		transformers_dict = { 
+			# 0: {'x_tfr': MirrorImage(), 'y_tfr_func': MirrorImage.mirror_align_objects_coord}, 
+			# 1: {'x_tfr': InvertVerticallyImage(), 'y_tfr_func': InvertVerticallyImage.invert_vetically_objects_coord},
+			# 2: {'x_tfr': MirrorAndInvertVerticallyImage(), 'y_tfr_func': MirrorAndInvertVerticallyImage.mirror_and_invert_vetically_objects_coord},
+			# 3: {'x_tfr': Rotate90Image(), 'y_tfr_func': Rotate90Image.rotate_objects_coord_90},
+			# 4: {'x_tfr': Rotate270Image(), 'y_tfr_func': Rotate270Image.rotate_objects_coord_270},
+			0: {'x_tfr': ChangeHueImage(), 'y_tfr_func': None},
+			1: {'x_tfr': ChangeSaturation(), 'y_tfr_func': None},
+			2: {'x_tfr': ChangeLuminescenceImage(), 'y_tfr_func': None},
+			3: {'x_tfr': ChangeHSLImage(), 'y_tfr_func': None},
+			4: {'x_tfr': RandomColorShifter(), 'y_tfr_func': None},
+		}
 
+		return transformers_dict
 
 	dataset = {}
 	train_data_info['model_img_size'] = yutil.get_model_img_size()
 	train_data_info['boxes_info_dict'] = util.PickleHandler.extract_from_pickle(util.get_obj_coord_pickle_datapath())
+	train_data_info['transformers'] = get_transformers_dict()
+	train_data_info['test_transformer_flag'] = 0
 	dataset['train'] = ImageDataset(**train_data_info)
 	
 	val_data_info['model_img_size'] = yutil.get_model_img_size()
@@ -524,6 +539,7 @@ def train_model(train_data_info, val_data_info, sanity_check=False):
 
 	# Train the network
 	train_network(**train_params)
+
 
 
 

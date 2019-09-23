@@ -19,7 +19,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 # TODO: Import only what is needed 
 from ..src.image_dataset import ImageDataset
-from ..src.transformers import MirrorImage, InvertVerticallyImage, MirrorAndInvertVerticallyImage, Rotate90Image, Rotate270Image
+from ..src.transformers import MirrorImage, InvertVerticallyImage, MirrorAndInvertVerticallyImage, Rotate90Image, Rotate270Image, RandomColorShifter, ChangeHueImage, ChangeSaturation, ChangeLuminescenceImage, ChangeHSLImage
 
 # from ..src.predictor import *
 
@@ -69,6 +69,7 @@ class TestTransformers(unittest.TestCase):
 		test_common_codes(self.data_img_dir, self.data_info, output_type, results_path, tfr_func=tfr_func)
 		self.assertTrue(True)
 
+
 	@unittest.SkipTest
 	def test_invert_vertically_image_transformer(self):
 
@@ -102,7 +103,7 @@ class TestTransformers(unittest.TestCase):
 		test_common_codes(self.data_img_dir, self.data_info,  output_type, results_path, tfr_func=tfr_func)
 		self.assertTrue(True)
 
-
+	@unittest.SkipTest
 	def test_rotate90_image_transformer(self):
 
 		self.data_info['transformers'] = {0: {'x_tfr': Rotate90Image(), 'y_tfr_func': Rotate90Image.rotate_objects_coord_90}}
@@ -118,6 +119,7 @@ class TestTransformers(unittest.TestCase):
 		test_common_codes(self.data_img_dir, self.data_info,  output_type, results_path, tfr_func=tfr_func)
 		self.assertTrue(True)
 
+	@unittest.SkipTest
 	def test_rotate270_image_transformer(self):
 
 		self.data_info['transformers'] = {0: {'x_tfr': Rotate270Image(), 'y_tfr_func': Rotate270Image.rotate_objects_coord_270}}
@@ -134,9 +136,98 @@ class TestTransformers(unittest.TestCase):
 		self.assertTrue(True)
 
 
-def test_common_codes(data_img_dir, data_info, output_type, results_path, tfr_func, ):
+	@unittest.SkipTest
+	def test_color_shift_image_transformer(self):
+
+		self.data_info['transformers'] = {0: {'x_tfr': RandomColorShifter(), 'y_tfr_func': None}}
+		tfr_func = RandomColorShifter.transform
+
+		results_path = util.get_results_dir('color_shift_image_tests/')
+		output_type = 'true_color_shifted'
+		print('**** results_path = ', results_path)
+		if not os.path.exists(results_path):
+			os.makedirs(results_path)
+			print('\n\n [Stored] Color shifted test results are stored at path = {} \n\n'.format(results_path))
+		
+		test_common_codes(self.data_img_dir, self.data_info,  output_type, results_path, tfr_func=tfr_func)
+		self.assertTrue(True)
+
+
+	@unittest.SkipTest
+	def test_change_hue_image_transformer(self):
+
+		self.data_info['transformers'] = {0: {'x_tfr': ChangeHueImage(), 'y_tfr_func': None}}
+		tfr_func = ChangeHueImage.transform
+
+		results_path = util.get_results_dir('change_hue_image_tests/')
+		output_type = 'true_changed_hue'
+		print('**** results_path = ', results_path)
+		if not os.path.exists(results_path):
+			os.makedirs(results_path)
+			print('\n\n [Stored] Changed hue test results are stored at path = {} \n\n'.format(results_path))
+		
+		test_common_codes(self.data_img_dir, self.data_info,  output_type, results_path, tfr_func=tfr_func)
+		self.assertTrue(True)
+
+
+
+	@unittest.SkipTest
+	def test_change_saturation_image_transformer(self):
+
+		self.data_info['transformers'] = {0: {'x_tfr': ChangeSaturation(), 'y_tfr_func': None}}
+		tfr_func = ChangeSaturation.transform
+
+		results_path = util.get_results_dir('change_saturation_image_tests/')
+		output_type = 'true_changed_saturation'
+		print('**** results_path = ', results_path)
+		if not os.path.exists(results_path):
+			os.makedirs(results_path)
+			print('\n\n [Stored] Changed saturation test results are stored at path = {} \n\n'.format(results_path))
+		
+		test_common_codes(self.data_img_dir, self.data_info,  output_type, results_path, tfr_func=tfr_func)
+		self.assertTrue(True)
+
+
+	@unittest.SkipTest
+	def test_change_luminescence_image_transformer(self):
+
+		self.data_info['transformers'] = {0: {'x_tfr': ChangeLuminescenceImage(), 'y_tfr_func': None}}
+		tfr_func = ChangeLuminescenceImage.transform
+
+		results_path = util.get_results_dir('change_luminescence_image_tests/')
+		output_type = 'true_changed_luminescence'
+		print('**** results_path = ', results_path)
+		if not os.path.exists(results_path):
+			os.makedirs(results_path)
+			print('\n\n [Stored] Changed luminescence test results are stored at path = {} \n\n'.format(results_path))
+		
+		test_common_codes(self.data_img_dir, self.data_info,  output_type, results_path, tfr_func=tfr_func)
+		self.assertTrue(True)
+
+
+	# @unittest.SkipTest
+	def test_change_hsl_image_transformer(self):
+
+		self.data_info['transformers'] = {0: {'x_tfr': ChangeHSLImage(), 'y_tfr_func': None}}
+		tfr_func = ChangeHSLImage.transform
+
+		results_path = util.get_results_dir('change_hsl_image_tests/')
+		output_type = 'true_changed_hsl'
+		print('**** results_path = ', results_path)
+		if not os.path.exists(results_path):
+			os.makedirs(results_path)
+			print('\n\n [Stored] Changed hsl test results are stored at path = {} \n\n'.format(results_path))
+		
+		test_common_codes(self.data_img_dir, self.data_info,  output_type, results_path, tfr_func=tfr_func)
+		self.assertTrue(True)
+
+
+
+################################# Supporting Functions #################################
+def test_common_codes(data_img_dir, data_info, output_type, results_path, tfr_func):
 	"""Common codes to test code and write results """
 
+	data_info['test_transformer_flag'] = 1
 	img_dataset = ImageDataset(**data_info)
 	img_fname_all = img_dataset.get_fnames()
 
@@ -179,11 +270,11 @@ def draw_and_save(data_img_dir, img_fname, output, output_type, results_path, tf
 	# Preprocess your image
 	img_path = os.path.join(data_img_dir, img_fname)
 	image = Image.open(img_path)
-	image = np.asarray(image)
+	image = np.array(image) # dtype=np.float32
 	
+	# pdb.set_trace()
 	if tfr_func is not None:
 		image = tfr_func(image)
-
 
 	image = Image.fromarray(image)
 
