@@ -498,25 +498,24 @@ def inverse_delta_obj_center(delta_coord, cell_center, cell_size):
 
 
 def delta_obj_size(object_image_size, model_image_size):
-	"""To compute the delta (scale) value of object (width, height) fromthe image (width, height) using sigmoid (range [0, 1]).
-		Since sigmoid limits values between 0, 1 and it is less of equal to image width or height thus the limit of 0-1 is one of
-		the suitable option.
+	"""To compute the delta (scale b/w -inf and inf) value of object (width, height) from the image (width, height) using sigmoid (range [0, 1]).
+		Since sigmoid transform the real input value between 0 and 1 thus allowing model to learn unconstrained.   
 
 		Parameters:
 		-----------
-			  object_image_size (tuple): width and height of the object. 
-			  model_image_size (tuple): width and height of model (prediction is on rescaled image)
+			  object_image_size (tuple): True width and height of the object. Already scaled (model_size / true_img_size) according to the model images size by  . 
+			  model_image_size (tuple): width and height of model (since the prediction is on rescaled image)
 
 		Returns:
 		--------
 			tuple: the scaled width and height w.r.t. model
 		
-		
 	"""
+
 	obj_w, obj_h = object_image_size
 	model_w, model_h = model_image_size
 
-	delta_w = -(np.log((model_w / obj_w) + 1e-6 - 1)) # 1e-6 to avoid nan 
+	delta_w = -(np.log((model_w / obj_w) + 1e-6 - 1)) # 1e-6 to avoid nan and is inverse of (1 / (1 + np.exp(-delta_w)))
 	delta_h = -(np.log((model_h / obj_h) + 1e-6 - 1))
 
 	return delta_w, delta_h
@@ -532,8 +531,8 @@ def inverse_delta_obj_size(delta_image_size, model_image_size):
 		Returns:
 		--------
 			tuple: the width and height of the object.
-
 	"""
+
 	delta_w, delta_h = delta_image_size
 	model_w, model_h = model_image_size
 
@@ -616,7 +615,7 @@ def construct_target(coord_labels, true_image_size, model_image_size, num_cls, g
 
 	# Since number of anchor here is only one
 	for obj in coord_labels:
-
+		# Scale object coordinates according to the model width and height
 		obj_coord = np.array(obj[:4]).reshape(2, 2) * [width / true_image_size[0], height / true_image_size[1]]
 		if y_tfr_func is not None:
 			obj_coord = y_tfr_func(obj_coord, model_image_size)
