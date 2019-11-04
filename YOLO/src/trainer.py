@@ -3,6 +3,10 @@
 
 """ ©Prem Prakash
 	Trainer: trains the network and saves the model for different check points
+	To execute this file from root (YOLO) of the project directory run following
+	``` $ python -m src.trainer ``` 
+
+	# https://stackoverflow.com/questions/45446418/modulenotfounderror-no-module-named-main-xxxx-main-is-not-a-packag
 """
 
 

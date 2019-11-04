@@ -88,7 +88,7 @@ Execute $ `pip install -r requirements.txt` to install all the dependency.
 ### Inference
 ---
 
- * From the project directory **execute** $```python ./src/predictor.py -h``` seek help on the type of argument needed to execute inference. Please note here that, although all the arguments that can be passed are optional for inference, however, for a new dataset provide fullpath to where the test data is stored and also the path for where the results should be saved.
+ * From the project directory (YOLO) **execute** $```python -m src.predictor  -h``` to seek help on the type of argument needed to perform inference. Please note here that, although all the arguments that can be passed are optional for inference, however, for a new dataset provide fullpath- 1. To locate test data, and 2. The path for where the results should be saved.
 
  ```
 Provide arguments for fullpath to directory where **Test** files are located
@@ -117,7 +117,7 @@ optional arguments:
 ### Conclusion
 ---
 
-Our objective here is to detect different types (`Beet vs Thistle`) of plants in such images. Despite having a limited amount (approx. 500 images) of data the optimised training model produced promising results. With this evidence, we can further dive deeper into this algorithm and try different techniques to further improve the results (listed in the future section) besides obtaining more data which always helps.  
+Our objective here is to detect different types (`Beet vs Thistle`) of plants in such images. Despite having a limited amount (approx. 500 images) of data the optimised training model has produced promising results. With this evidence, we can further dive deeper into this algorithm and try different techniques to further improve the results (listed in the future section) besides obtaining more data or use transfer learning (using pre-trained CNN model) which can performs better even with small dataset.  
 
 
 ### Future Works 

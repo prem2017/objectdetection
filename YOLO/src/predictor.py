@@ -371,9 +371,9 @@ if __name__ == '__main__':
 	# for ex in extensions:
 	ex =  '_maxaps' # '_maxconf_f1'# '_mintrain' '_minval' _maxaps
 	model_fnames = [model_fname + ex] # _maxconf_f1,   _minval model_fname + '_mintrain', model_fname + '_minval', model_fname + '_min_mae_val']
-	msg = '###################################################################'
-	msg += '## {} ##'.format(model_fnames)
-	msg += '###################################################################'
+	msg = '#########################################################################'
+	msg += '\n##  {}  ##'.format(model_fnames)
+	msg += '\n#########################################################################'
 	logger.info(msg); print(msg)
 
 
