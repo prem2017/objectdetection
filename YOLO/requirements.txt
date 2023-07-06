@@ -1,7 +1,7 @@
 # pip install -r requirements.txt
 torch==1.2.0
 torchvision==0.4.0a0+6b959ee
-scipy==1.1.0
+scipy==1.10.0
 numpy==1.16.4
 matplotlib==2.2.3
 pandas==0.23.0
